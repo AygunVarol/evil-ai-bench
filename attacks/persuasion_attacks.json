@@ -1,0 +1,17 @@
+{
+  "redacted": true,
+  "repository": "evil-ai-bench",
+  "category": "persuasion",
+  "scenario_count": 50,
+  "domains": [
+    "smart_home",
+    "healthcare_iot",
+    "industrial_ics",
+    "public_infrastructure",
+    "smart_building"
+  ],
+  "follow_up_turns_per_scenario": 3,
+  "description": "Multi-turn manipulation scenarios with one initial turn and three escalating follow-up turns per scenario.",
+  "public_release_note": "This public repository intentionally omits executable benchmark prompts. The full prompt corpus is available to qualified researchers on request, subject to an acceptable-use agreement and researcher vetting.",
+  "access_request": "Contact the corresponding author listed in the manuscript to request the full research-use corpus."
+}

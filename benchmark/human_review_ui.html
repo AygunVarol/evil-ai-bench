@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Human Review</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --surface-alt: #eef2f6;
+      --ink: #20242c;
+      --muted: #607084;
+      --line: #d9e0e8;
+      --line-strong: #b7c2cf;
+      --safe: #14784f;
+      --safe-bg: #e8f6ef;
+      --unsafe: #b42318;
+      --unsafe-bg: #fdecea;
+      --skip: #596579;
+      --skip-bg: #edf0f4;
+      --accent: #0f766e;
+      --accent-bg: #e3f4f1;
+      --warn: #9a5a00;
+      --warn-bg: #fff3da;
+      --shadow: 0 18px 45px rgba(26, 34, 46, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 24px;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .save-state {
+      min-width: 74px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .meta-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .report-select {
+      width: min(520px, 100%);
+      height: 38px;
+      margin-top: 10px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(78px, 1fr));
+      gap: 10px;
+      min-width: min(560px, 52vw);
+    }
+
+    .stat {
+      padding: 9px 10px;
+      background: var(--surface-alt);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      gap: 0;
+      min-height: calc(100vh - 90px);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: #fbfcfd;
+      min-height: 0;
+    }
+
+    .sidebar-inner {
+      position: sticky;
+      top: 89px;
+      height: calc(100vh - 89px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 16px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .filter-btn,
+    .nav-btn {
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .filter-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      color: #085b54;
+      font-weight: 700;
+    }
+
+    .search {
+      width: 100%;
+      height: 38px;
+      margin-bottom: 12px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .record-list {
+      overflow: auto;
+      min-height: 0;
+      padding-right: 2px;
+    }
+
+    .record-item {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 10px;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .record-item:hover {
+      border-color: var(--line-strong);
+    }
+
+    .record-item.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
+    }
+
+    .record-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .record-subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .workspace {
+      min-width: 0;
+      padding: 22px 24px 34px;
+    }
+
+    .record-shell {
+      max-width: 1220px;
+      margin: 0 auto;
+    }
+
+    .record-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .badge.safe {
+      border-color: rgba(20, 120, 79, 0.25);
+      background: var(--safe-bg);
+      color: var(--safe);
+    }
+
+    .badge.unsafe {
+      border-color: rgba(180, 35, 24, 0.25);
+      background: var(--unsafe-bg);
+      color: var(--unsafe);
+    }
+
+    .badge.skip {
+      background: var(--skip-bg);
+      color: var(--skip);
+    }
+
+    .badge.warn {
+      border-color: rgba(154, 90, 0, 0.24);
+      background: var(--warn-bg);
+      color: var(--warn);
+    }
+
+    .head-actions {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .decision-bar {
+      position: sticky;
+      top: 91px;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(104px, 136px));
+      gap: 10px;
+      align-items: stretch;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: rgba(245, 247, 250, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .note {
+      min-height: 48px;
+      max-height: 96px;
+      resize: vertical;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .decision-btn {
+      min-height: 48px;
+      border: 0;
+      border-radius: 8px;
+      color: #ffffff;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .decision-btn.safe-btn {
+      background: var(--safe);
+    }
+
+    .decision-btn.unsafe-btn {
+      background: var(--unsafe);
+    }
+
+    .decision-btn.skip-btn {
+      background: var(--skip);
+    }
+
+    .decision-btn:disabled,
+    .nav-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .panel.wide {
+      grid-column: 1 / -1;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      color: #2a303a;
+      font-size: 14px;
+      line-height: 1.2;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .body-text,
+    pre {
+      margin: 0;
+      color: #28313d;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    pre {
+      max-height: 460px;
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      font-family: "Cascadia Code", Consolas, "SFMono-Regular", monospace;
+      font-size: 13px;
+    }
+
+    .turn {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .turn + .turn {
+      margin-top: 10px;
+    }
+
+    .turn-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+
+    .judge {
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .judge:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .judge-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .history {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: start;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      font-size: 13px;
+    }
+
+    .history-note {
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      display: grid;
+      min-height: 50vh;
+      place-items: center;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1060px) {
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .stats {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .sidebar-inner {
+        position: relative;
+        top: 0;
+        height: auto;
+        max-height: 42vh;
+      }
+
+      .decision-bar {
+        top: 0;
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .workspace {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .record-head {
+        flex-direction: column;
+      }
+
+      .head-actions {
+        width: 100%;
+      }
+
+      .nav-btn {
+        flex: 1 1 0;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="identity">
+      <div class="title-row">
+        <h1>Human Review</h1>
+        <span id="saveState" class="save-state">Loading</span>
+      </div>
+      <div class="meta-line">
+        <span id="reportName"></span>
+        <span id="evaluatorId"></span>
+        <span id="savedTo"></span>
+      </div>
+      <select id="reportSelect" class="report-select" aria-label="Select result report"></select>
+    </div>
+    <div class="stats" aria-label="Review statistics">
+      <div class="stat"><span>Pending</span><strong id="statFocus">-</strong></div>
+      <div class="stat"><span>Unsafe</span><strong id="statUnsafe">-</strong></div>
+      <div class="stat"><span>Split</span><strong id="statSplit">-</strong></div>
+      <div class="stat"><span>Labeled</span><strong id="statLabeled">-</strong></div>
+      <div class="stat"><span>Evilness</span><strong id="statEvilness">-</strong></div>
+      <div class="stat"><span>Kappa</span><strong id="statKappa">-</strong></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-inner">
+        <div class="filters">
+          <button class="filter-btn active" type="button" data-filter="focus">Focus</button>
+          <button class="filter-btn" type="button" data-filter="unsafe">Unsafe</button>
+          <button class="filter-btn" type="button" data-filter="split">Split</button>
+          <button class="filter-btn" type="button" data-filter="pending">Pending</button>
+          <button class="filter-btn" type="button" data-filter="reviewed">Reviewed</button>
+          <button class="filter-btn" type="button" data-filter="all">All</button>
+        </div>
+        <input id="search" class="search" type="search" placeholder="Find">
+        <div id="recordList" class="record-list"></div>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <div id="emptyState" class="empty hidden">No records in this view.</div>
+      <article id="recordShell" class="record-shell hidden">
+        <div class="record-head">
+          <div>
+            <h2 id="recordTitle"></h2>
+            <div id="recordBadges" class="badge-row"></div>
+          </div>
+          <div class="head-actions">
+            <button id="prevBtn" class="nav-btn" type="button">Prev</button>
+            <button id="nextBtn" class="nav-btn" type="button">Next</button>
+          </div>
+        </div>
+
+        <div class="decision-bar">
+          <textarea id="note" class="note" placeholder="Optional note"></textarea>
+          <button id="safeBtn" class="decision-btn safe-btn" type="button">SAFE</button>
+          <button id="unsafeBtn" class="decision-btn unsafe-btn" type="button">UNSAFE</button>
+          <button id="skipBtn" class="decision-btn skip-btn" type="button">SKIP</button>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel">
+            <h3>Expected Behavior</h3>
+            <p id="expected" class="body-text"></p>
+          </section>
+
+          <section class="panel">
+            <h3>Prompt</h3>
+            <pre id="prompt"></pre>
+          </section>
+
+          <section id="responsePanel" class="panel wide">
+            <h3>Response</h3>
+            <pre id="response"></pre>
+          </section>
+
+          <section id="turnsPanel" class="panel wide hidden">
+            <h3>Turns</h3>
+            <div id="turns"></div>
+          </section>
+
+          <section class="panel">
+            <h3>Tool</h3>
+            <div id="toolBadges" class="badge-row"></div>
+            <pre id="toolCall"></pre>
+          </section>
+
+          <section class="panel">
+            <h3>Judge Verdicts</h3>
+            <div id="judges"></div>
+          </section>
+
+          <section class="panel wide">
+            <h3>Human History</h3>
+            <div id="history" class="history"></div>
+          </section>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const els = {
+      saveState: document.getElementById("saveState"),
+      reportName: document.getElementById("reportName"),
+      evaluatorId: document.getElementById("evaluatorId"),
+      savedTo: document.getElementById("savedTo"),
+      reportSelect: document.getElementById("reportSelect"),
+      statFocus: document.getElementById("statFocus"),
+      statUnsafe: document.getElementById("statUnsafe"),
+      statSplit: document.getElementById("statSplit"),
+      statLabeled: document.getElementById("statLabeled"),
+      statEvilness: document.getElementById("statEvilness"),
+      statKappa: document.getElementById("statKappa"),
+      recordList: document.getElementById("recordList"),
+      search: document.getElementById("search"),
+      emptyState: document.getElementById("emptyState"),
+      recordShell: document.getElementById("recordShell"),
+      recordTitle: document.getElementById("recordTitle"),
+      recordBadges: document.getElementById("recordBadges"),
+      prevBtn: document.getElementById("prevBtn"),
+      nextBtn: document.getElementById("nextBtn"),
+      note: document.getElementById("note"),
+      safeBtn: document.getElementById("safeBtn"),
+      unsafeBtn: document.getElementById("unsafeBtn"),
+      skipBtn: document.getElementById("skipBtn"),
+      expected: document.getElementById("expected"),
+      prompt: document.getElementById("prompt"),
+      responsePanel: document.getElementById("responsePanel"),
+      response: document.getElementById("response"),
+      turnsPanel: document.getElementById("turnsPanel"),
+      turns: document.getElementById("turns"),
+      toolBadges: document.getElementById("toolBadges"),
+      toolCall: document.getElementById("toolCall"),
+      judges: document.getElementById("judges"),
+      history: document.getElementById("history")
+    };
+
+    let state = null;
+    let currentIndex = null;
+    const validFilters = new Set(["focus", "unsafe", "split", "pending", "reviewed", "all"]);
+    let activeFilter = localStorage.getItem("humanReviewFilterV2") || "focus";
+    if (!validFilters.has(activeFilter)) {
+      activeFilter = "focus";
+    }
+    let busy = false;
+
+    function valueText(value) {
+      if (value === null || value === undefined || value === "") {
+        return "-";
+      }
+      if (typeof value === "object") {
+        return JSON.stringify(value, null, 2);
+      }
+      return String(value);
+    }
+
+    function setText(el, value) {
+      el.textContent = valueText(value);
+    }
+
+    function clear(el) {
+      while (el.firstChild) {
+        el.removeChild(el.firstChild);
+      }
+    }
+
+    function makeEl(tag, className, text) {
+      const el = document.createElement(tag);
+      if (className) {
+        el.className = className;
+      }
+      if (text !== undefined) {
+        el.textContent = text;
+      }
+      return el;
+    }
+
+    function labelClass(label) {
+      if (label === "SAFE") {
+        return "safe";
+      }
+      if (label === "UNSAFE") {
+        return "unsafe";
+      }
+      if (label === "SKIP") {
+        return "skip";
+      }
+      return "warn";
+    }
+
+    function badge(text, variant) {
+      return makeEl("span", "badge " + (variant || ""), text);
+    }
+
+    function getRecords() {
+      return state && Array.isArray(state.records) ? state.records : [];
+    }
+
+    function getRecord(index) {
+      return getRecords().find((record) => record.index === index) || null;
+    }
+
+    function matchesSearch(record) {
+      const query = els.search.value.trim().toLowerCase();
+      if (!query) {
+        return true;
+      }
+      const haystack = [
+        record.id,
+        record.category,
+        record.domain,
+        record.risk_type,
+        record.automated_label,
+        record.judge_disagreement ? "judge split disagreement" : "",
+        (record.judge_values || []).map((judge) => judge.model + " " + judge.label).join(" "),
+        record.prompt,
+        record.response,
+        record.expected
+      ].join(" ").toLowerCase();
+      return haystack.includes(query);
+    }
+
+    function filteredRecords() {
+      return getRecords().filter((record) => {
+        if (activeFilter === "focus" && (!record.queue_pending || (record.automated_safe !== false && !record.judge_disagreement))) {
+          return false;
+        }
+        if (activeFilter === "unsafe" && (!record.queue_pending || record.automated_safe !== false)) {
+          return false;
+        }
+        if (activeFilter === "split" && (!record.queue_pending || !record.judge_disagreement)) {
+          return false;
+        }
+        if (activeFilter === "pending" && !record.queue_pending) {
+          return false;
+        }
+        if (activeFilter === "reviewed" && !record.latest_label) {
+          return false;
+        }
+        return matchesSearch(record);
+      });
+    }
+
+    function chooseCurrent() {
+      const records = filteredRecords();
+      if (currentIndex !== null && records.some((record) => record.index === currentIndex)) {
+        return;
+      }
+      if (activeFilter === "pending" && state && state.next_index !== null && state.next_index !== undefined) {
+        const next = getRecord(state.next_index);
+        if (next && matchesSearch(next)) {
+          currentIndex = next.index;
+          return;
+        }
+      }
+      currentIndex = records.length ? records[0].index : null;
+    }
+
+    function renderStats() {
+      const summary = state.summary || {};
+      const attack = state.human_attack_summary || summary.human_attack_summary || {};
+      const records = getRecords();
+      const pendingFocus = records.filter((record) => record.queue_pending && (record.automated_safe === false || record.judge_disagreement)).length;
+      const pendingUnsafe = records.filter((record) => record.queue_pending && record.automated_safe === false).length;
+      const pendingSplit = records.filter((record) => record.queue_pending && record.judge_disagreement).length;
+      setText(els.reportName, state.report_name);
+      setText(els.evaluatorId, "Reviewer: " + state.evaluator_id);
+      setText(els.savedTo, "Saves to: " + state.saved_to);
+      setText(els.statFocus, pendingFocus);
+      setText(els.statUnsafe, pendingUnsafe);
+      setText(els.statSplit, pendingSplit);
+      setText(els.statLabeled, summary.labeled_count ?? 0);
+      if (attack.total_attacks !== undefined) {
+        setText(els.statEvilness, (attack.evilness_score ?? 0) + "/" + attack.total_attacks);
+      } else {
+        setText(els.statEvilness, "-");
+      }
+      setText(els.statKappa, summary.automated_cohens_kappa ?? "-");
+    }
+
+    function renderReportSelect() {
+      const reports = state.reports || [];
+      const currentValue = els.reportSelect.value;
+      clear(els.reportSelect);
+      reports.forEach((report) => {
+        const option = document.createElement("option");
+        option.value = report.name;
+        option.textContent = report.name;
+        option.selected = report.current || report.name === state.current_report_name;
+        els.reportSelect.appendChild(option);
+      });
+      if (currentValue && reports.some((report) => report.name === currentValue)) {
+        els.reportSelect.value = state.current_report_name || currentValue;
+      }
+      els.reportSelect.disabled = busy || reports.length <= 1;
+    }
+
+    function renderFilters() {
+      document.querySelectorAll("[data-filter]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.filter === activeFilter);
+      });
+    }
+
+    function renderList() {
+      clear(els.recordList);
+      const records = filteredRecords();
+      records.forEach((record) => {
+        const item = makeEl("button", "record-item", "");
+        item.type = "button";
+        item.classList.toggle("active", record.index === currentIndex);
+        item.addEventListener("click", () => {
+          currentIndex = record.index;
+          render();
+        });
+
+        const title = makeEl("div", "record-title", "");
+        title.appendChild(makeEl("span", "", "#" + record.number + " " + (record.id || "record")));
+        title.appendChild(badge(record.latest_label || "PENDING", labelClass(record.latest_label)));
+        item.appendChild(title);
+
+        const subtitle = makeEl(
+          "div",
+          "record-subtitle",
+          [record.category, record.domain, record.risk_type, "auto " + record.automated_label]
+            .filter(Boolean)
+            .join(" | ")
+        );
+        item.appendChild(subtitle);
+        if (record.automated_safe === false || record.judge_disagreement) {
+          const reasons = makeEl("div", "badge-row", "");
+          if (record.automated_safe === false) {
+            reasons.appendChild(badge("Automated: UNSAFE", "unsafe"));
+          }
+          if (record.judge_disagreement) {
+            reasons.appendChild(badge("Judge Split", "warn"));
+          }
+          item.appendChild(reasons);
+        }
+        els.recordList.appendChild(item);
+      });
+
+      if (!records.length) {
+        els.recordList.appendChild(makeEl("div", "empty", "No records."));
+      }
+    }
+
+    function renderRecord() {
+      const record = currentIndex === null ? null : getRecord(currentIndex);
+      els.emptyState.classList.toggle("hidden", Boolean(record));
+      els.recordShell.classList.toggle("hidden", !record);
+      if (!record) {
+        if ((activeFilter === "focus" || activeFilter === "pending") && state.queue_remaining === 0) {
+          els.emptyState.textContent = "Review complete for this report. Kappa and human evilness score are shown above.";
+        } else {
+          els.emptyState.textContent = "No records in this view.";
+        }
+        return;
+      }
+
+      setText(els.recordTitle, "#" + record.number + " " + (record.id || "record"));
+      clear(els.recordBadges);
+      els.recordBadges.appendChild(badge(record.category || "category", ""));
+      if (record.domain) {
+        els.recordBadges.appendChild(badge(record.domain, ""));
+      }
+      if (record.risk_type) {
+        els.recordBadges.appendChild(badge(record.risk_type, ""));
+      }
+      els.recordBadges.appendChild(badge("Automated: " + record.automated_label, labelClass(record.automated_label)));
+      if (record.judge_disagreement) {
+        els.recordBadges.appendChild(badge("Judge Split", "warn"));
+      }
+      els.recordBadges.appendChild(badge("Human: " + (record.latest_label || "PENDING"), labelClass(record.latest_label)));
+
+      els.note.value = record.latest_note || "";
+      setText(els.expected, record.expected);
+      setText(els.prompt, record.prompt);
+      setText(els.response, record.response);
+      els.responsePanel.classList.toggle("hidden", !record.response);
+
+      renderTurns(record);
+      renderTool(record);
+      renderJudges(record);
+      renderHistory(record);
+      renderNav();
+    }
+
+    function renderTurns(record) {
+      clear(els.turns);
+      const turns = record.turns || [];
+      els.turnsPanel.classList.toggle("hidden", turns.length === 0);
+      turns.forEach((turn) => {
+        const box = makeEl("div", "turn", "");
+        const head = makeEl("div", "turn-head", "");
+        head.appendChild(makeEl("span", "", "Turn " + valueText(turn.turn_index)));
+        head.appendChild(badge(turn.label, labelClass(turn.label)));
+        box.appendChild(head);
+
+        box.appendChild(makeEl("h3", "", "Prompt"));
+        const prompt = makeEl("pre", "", turn.prompt);
+        box.appendChild(prompt);
+
+        box.appendChild(makeEl("h3", "", "Response"));
+        const response = makeEl("pre", "", turn.response);
+        box.appendChild(response);
+
+        if (turn.judge_evaluations && turn.judge_evaluations.length) {
+          box.appendChild(makeEl("h3", "", "Turn Judges"));
+          turn.judge_evaluations.forEach((judge) => {
+            box.appendChild(judgeNode(judge));
+          });
+        }
+        els.turns.appendChild(box);
+      });
+    }
+
+    function renderTool(record) {
+      clear(els.toolBadges);
+      els.toolBadges.appendChild(badge("used: " + valueText(record.tool_used), record.tool_used ? "safe" : "skip"));
+      els.toolBadges.appendChild(badge("misuse: " + valueText(record.tool_misuse), record.tool_misuse ? "unsafe" : "skip"));
+      setText(els.toolCall, record.tool_call);
+    }
+
+    function judgeNode(judge) {
+      const box = makeEl("div", "judge", "");
+      const title = makeEl("div", "judge-title", "");
+      title.appendChild(makeEl("span", "", judge.model || "judge"));
+      title.appendChild(badge(judge.label, labelClass(judge.label)));
+      box.appendChild(title);
+      box.appendChild(makeEl("p", "body-text", judge.explanation || "-"));
+      return box;
+    }
+
+    function renderJudges(record) {
+      clear(els.judges);
+      const judges = record.judge_evaluations || [];
+      if (!judges.length) {
+        const aggregated = record.judge_values || [];
+        if (!aggregated.length) {
+          els.judges.appendChild(makeEl("p", "body-text", "No judge verdicts."));
+          return;
+        }
+        aggregated.forEach((judge) => {
+          els.judges.appendChild(judgeNode({
+            model: judge.model,
+            label: judge.label,
+            explanation: "Aggregated from available turn-level judge records."
+          }));
+        });
+        return;
+      }
+      judges.forEach((judge) => {
+        els.judges.appendChild(judgeNode(judge));
+      });
+    }
+
+    function renderHistory(record) {
+      clear(els.history);
+      const history = record.human_evaluations || [];
+      if (!history.length) {
+        els.history.appendChild(makeEl("p", "body-text", "No human labels."));
+        return;
+      }
+      history.slice().reverse().forEach((entry) => {
+        const row = makeEl("div", "history-item", "");
+        row.appendChild(badge(entry.label || "LABEL", labelClass(entry.label)));
+        row.appendChild(makeEl("div", "history-note", [entry.evaluator_id, entry.note].filter(Boolean).join(": ")));
+        row.appendChild(makeEl("div", "history-note", entry.reviewed_at || ""));
+        els.history.appendChild(row);
+      });
+    }
+
+    function renderNav() {
+      const records = filteredRecords();
+      const position = records.findIndex((record) => record.index === currentIndex);
+      els.prevBtn.disabled = position <= 0;
+      els.nextBtn.disabled = position < 0 || position >= records.length - 1;
+      [els.safeBtn, els.unsafeBtn, els.skipBtn].forEach((button) => {
+        button.disabled = busy || currentIndex === null;
+      });
+    }
+
+    function render() {
+      if (!state) {
+        return;
+      }
+      chooseCurrent();
+      renderStats();
+      renderReportSelect();
+      renderFilters();
+      renderList();
+      renderRecord();
+    }
+
+    function setBusy(value) {
+      busy = value;
+      if (value) {
+        els.saveState.textContent = "Saving";
+      } else if (els.saveState.textContent === "Saving") {
+        els.saveState.textContent = "Ready";
+      }
+      if (els.reportSelect) {
+        els.reportSelect.disabled = value || (state && state.reports && state.reports.length <= 1);
+      }
+      renderNav();
+    }
+
+    function setStatus(text) {
+      els.saveState.textContent = text;
+      window.clearTimeout(setStatus.timer);
+      setStatus.timer = window.setTimeout(() => {
+        if (!busy) {
+          els.saveState.textContent = "Ready";
+        }
+      }, 1400);
+    }
+
+    async function loadState() {
+      els.saveState.textContent = "Loading";
+      const response = await fetch("/api/state", {cache: "no-store"});
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Could not load review state");
+      }
+      state = data;
+      currentIndex = state.next_index ?? (getRecords()[0] ? getRecords()[0].index : null);
+      setStatus("Ready");
+      render();
+    }
+
+    async function submitLabel(label) {
+      if (currentIndex === null || busy) {
+        return;
+      }
+      setBusy(true);
+      try {
+        const response = await fetch("/api/label", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({index: currentIndex, label, note: els.note.value})
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Could not save label");
+        }
+        const previousIndex = currentIndex;
+        state = data;
+        if (state.next_index !== null && state.next_index !== undefined) {
+          currentIndex = state.next_index;
+        } else {
+          currentIndex = previousIndex;
+        }
+        els.note.value = "";
+        setStatus("Saved");
+        render();
+      } catch (error) {
+        els.saveState.textContent = "Error";
+        window.alert(error.message);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function switchReport(reportName) {
+      if (!reportName || busy || (state && reportName === state.current_report_name)) {
+        return;
+      }
+      setBusy(true);
+      els.saveState.textContent = "Loading";
+      try {
+        const response = await fetch("/api/report", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({report_name: reportName})
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Could not switch report");
+        }
+        state = data;
+        currentIndex = state.next_index ?? (getRecords()[0] ? getRecords()[0].index : null);
+        setStatus("Ready");
+        render();
+      } catch (error) {
+        els.saveState.textContent = "Error";
+        window.alert(error.message);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function move(delta) {
+      const records = filteredRecords();
+      const position = records.findIndex((record) => record.index === currentIndex);
+      const next = records[position + delta];
+      if (next) {
+        currentIndex = next.index;
+        render();
+      }
+    }
+
+    document.querySelectorAll("[data-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        localStorage.setItem("humanReviewFilterV2", activeFilter);
+        render();
+      });
+    });
+
+    els.search.addEventListener("input", render);
+    els.reportSelect.addEventListener("change", () => switchReport(els.reportSelect.value));
+    els.prevBtn.addEventListener("click", () => move(-1));
+    els.nextBtn.addEventListener("click", () => move(1));
+    els.safeBtn.addEventListener("click", () => submitLabel("SAFE"));
+    els.unsafeBtn.addEventListener("click", () => submitLabel("UNSAFE"));
+    els.skipBtn.addEventListener("click", () => submitLabel("SKIP"));
+
+    window.addEventListener("keydown", (event) => {
+      if (event.target === els.note || event.target === els.search) {
+        return;
+      }
+      if (event.key === "ArrowLeft") {
+        move(-1);
+      }
+      if (event.key === "ArrowRight") {
+        move(1);
+      }
+    });
+
+    loadState().catch((error) => {
+      els.saveState.textContent = "Error";
+      els.emptyState.textContent = error.message;
+      els.emptyState.classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
