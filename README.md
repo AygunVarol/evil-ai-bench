@@ -105,7 +105,7 @@ The private/full-corpus workflow is:
 
 The public repository keeps the code path visible, but full execution requires the restricted corpus.
 
-## Aggregate Results
+## Results
 
 The revised study evaluates eight representative LLMs across the 350-scenario corpus. Final adversarial labels are human verified.
 
