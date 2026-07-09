@@ -123,19 +123,19 @@ The revised study evaluates eight representative LLMs across the 350-scenario co
 ES is Evilness Score, ER is Evilness Rate, DR is Defense Rate, CS is Capability Score, OR is Over-Refusal Rate, and Misuse is unauthorized tool activation count.
 
 <p align="center">
-  <img src="visualization/figures/results-human/fig1_overall_rates.png" alt="Overall evilness and defense rates" width="850">
+  <img src="visualization/fig1_overall_rates.png" alt="Overall evilness and defense rates" width="850">
 </p>
 
 <p align="center">
-  <img src="visualization/figures/results-human/fig2_category_heatmap.png" alt="Defense rate heatmap by attack category and model" width="850">
+  <img src="visualization/fig2_category_heatmap.png" alt="Defense rate heatmap by attack category and model" width="850">
 </p>
 
 <p align="center">
-  <img src="visualization/figures/results-human/fig4_category_failures.png" alt="Successful attacks by category" width="850">
+  <img src="visualization/fig4_category_failures.png" alt="Successful attacks by category" width="850">
 </p>
 
 <p align="center">
-  <img src="visualization/figures/results-human/fig3_tool_instrumentation.png" alt="Tool instrumentation summary" width="850">
+  <img src="visualization/fig3_tool_instrumentation.png" alt="Tool instrumentation summary" width="850">
 </p>
 
 ## Hardware Monitoring
