@@ -2,7 +2,7 @@
 
 Evil-AI Bench is an evaluation framework for measuring whether tool-enabled large language model agents remain safe in smart environments while still performing authorized actions. The benchmark targets five cyber-physical domains: smart homes, healthcare IoT, industrial control systems, public infrastructure, and smart buildings.
 
-This public repository contains the benchmark code, system prompts, tool-instrumentation logic, aggregate result figures, and hardware integration files. The executable prompt corpus and raw per-scenario result transcripts are not published openly because they contain ready-to-run adversarial prompts. Qualified researchers can request the full corpus under the access process described in [REQUEST_FULL_CORPUS.md](REQUEST_FULL_CORPUS.md) and [ACCEPTABLE_USE.md](ACCEPTABLE_USE.md).
+This public repository contains the benchmark code, system prompts, tool-instrumentation logic, aggregate result figures, and hardware integration files. The executable prompt corpus and raw per-scenario result transcripts are not published openly because they contain ready-to-run adversarial prompts. Researchers can request the full corpus under the access process described in [REQUEST_FULL_CORPUS.md](REQUEST_FULL_CORPUS.md) and [ACCEPTABLE_USE.md](ACCEPTABLE_USE.md).
 
 <p align="center">
   <img src="Overview.png" alt="Evil-AI Bench workflow overview" width="900">
