@@ -8,6 +8,8 @@ This public repository contains the benchmark code, system prompts, tool-instrum
   <img src="Overview.png" alt="Evil-AI Bench workflow overview" width="900">
 </p>
 
+**Paper:** [IEEE Access, 2026](https://doi.org/10.1109/ACCESS.2026.3727159)
+
 ## What Is Public
 
 - Benchmark runner and scoring code.
@@ -184,7 +186,21 @@ This benchmark is intended for controlled research, model evaluation, and defens
 
 ## Citation
 
-Citation details will be added after publication.
+If you use Evil-AI Bench in your research, please cite our paper:
+
+> A. Varol, A. Shaikh, H. Jalo, G. Muchenje, J. S. de Cerqueira, K.-K. Kemell, N. H. Motlagh, M. Leino, H. Pirkkalainen, P. Abrahamsson, and J. Virkki, "Evil-AI Benchmark: An Evaluation Framework for Adversarial Security Assessment of LLM Agents in Smart Environments," *IEEE Access*, vol. 14, pp. 133098–133116, 2026, doi: [10.1109/ACCESS.2026.3727159](https://doi.org/10.1109/ACCESS.2026.3727159).
+
+```bibtex
+@article{varol2026evilai,
+  title   = {Evil-{AI} Benchmark: An Evaluation Framework for Adversarial Security Assessment of {LLM} Agents in Smart Environments},
+  author  = {Varol, A. and Shaikh, A. and Jalo, H. and Muchenje, G. and de Cerqueira, J. S. and Kemell, K.-K. and Motlagh, N. H. and Leino, M. and Pirkkalainen, H. and Abrahamsson, P. and Virkki, J.},
+  journal = {IEEE Access},
+  volume  = {14},
+  pages   = {133098--133116},
+  year    = {2026},
+  doi     = {10.1109/ACCESS.2026.3727159}
+}
+```
 
 ## License
 
